@@ -19,7 +19,7 @@ def scrape_article(link):
     soup = BeautifulSoup(page.content, 'html.parser')
 
     # Extract the title
-    title = soup.find('h1').text.strip()
+    # title = soup.find('h1').text.strip()
 
     # Extract the body text
     body_text = []
@@ -27,18 +27,17 @@ def scrape_article(link):
         body_text.append(paragraph.text.strip())
     body_text = ' '.join(body_text)
 
-    # Extract numeric data (requires specific logic based on the website structure)
-    numeric_data = []
-    # Example: Extract numbers from a specific class
-    for element in soup.find_all('span', class_='number'):
-        numeric_data.append(float(element.text.strip()))
+    # # Extract numeric data (requires specific logic based on the website structure)
+    # numeric_data = []
+    # # Example: Extract numbers from a specific class
+    # for element in soup.find_all('span', class_='number'):
+    #     numeric_data.append(float(element.text.strip()))
 
     # Return the scraped data
-    return {
-        'title': title,
-        'body_text': body_text,
-        'numeric_data': numeric_data,
-    }
+
+    # 'numeric_data': numeric_data,
+    return body_text
+
 
 #Test
 # Link='https://www.defenseworld.net/2024/05/28/infosys-limited-nyseinfy-shares-acquired-by-eversource-wealth-advisors-llc.html'
@@ -70,14 +69,14 @@ def Scrape_links(stock,location='US'):
             print('No datetime element found')
             datetime = None
 
-        links.append((heading, href, datetime))
+        links.append([heading, href, datetime])
 
-    print(links[0])
+    # print(links[0])
     
     # Print the total number of links
     print('Total links:', len(links))
     return links
 
 # Test
-Scrape_links('Infosys','IN')
-Scrape_links('Infosys','US')
+# Scrape_links('Infosys','IN')
+# Scrape_links('Infosys','US')
