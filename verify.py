@@ -1,7 +1,7 @@
 import pathlib
 import textwrap
 
-import google.generativeai as genai
+from google import generativeai as genai
 
 from IPython.display import display
 from IPython.display import Markdown
@@ -32,12 +32,18 @@ def stockify(list, company):
     '''
     stockified_articals=[]
     base_query=f'Please just answer either true or false it the following artical heading effect stock price of {company}.\n'
+    t=0
     for i in list:
+      t+=1
+      print(t)
+      if t>=10:
+         break
       query=base_query+i[0]
       print('query:\n',query)
       response = model.generate_content(query)
       result = True if response.text[0]=='T' else False
-      stockified_articals.append(i)
+      if result:
+         stockified_articals.append(i)
       print("result:\n", result)
     return stockified_articals
 

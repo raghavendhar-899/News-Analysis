@@ -1,5 +1,6 @@
 # Import necessary libraries
-from transformers import pipeline
+import torch
+from transformers import pipeline, AutoTokenizer
 
 # Define the function to generate a summary of the provided text
 def get_summary(text):
@@ -14,10 +15,14 @@ def get_summary(text):
     """
     # print('inside')
     # Load the BART summarization model
-    summarizer = pipeline("summarization")
+    summarizer = pipeline("summarization",model='sshleifer/distilbart-cnn-12-6')
+
+    # tokenizer = AutoTokenizer.from_pretrained("valhalla/bart-large-finetuned-squadv1")
+
+    # text = tokenizer(text, padding=1000, truncation=True)
 
     # Generate the summary
-    summary = summarizer(text, max_length=60, min_length=20, do_sample=False)[0]["summary_text"]
+    summary = summarizer(text[:1000], max_length=60, min_length=20, do_sample=False)[0]["summary_text"]
 
     # print(summary,'summary')
 

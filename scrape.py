@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import verify
 
 # from serpapi import GoogleSearch
 
@@ -48,7 +49,7 @@ def Scrape_links(stock,location='US'):
     links = []
 
     base_url='https://news.google.com'
-    url = base_url+'/search?q=' + stock + '&gl='+location
+    url = base_url+'/search?q=' + stock +'%20when%3A1d'+ '&gl='+location
     response = requests.get(url)
 
     # Parse the webpage content with Beautiful Soup
@@ -80,3 +81,4 @@ def Scrape_links(stock,location='US'):
 # Test
 # Scrape_links('Infosys','IN')
 # Scrape_links('Infosys','US')
+print(scrape_article('https://timesofindia.indiatimes.com/business/india-business/infosys-wins-100-million-ikea-deal/articleshow/111007179.cms'))
