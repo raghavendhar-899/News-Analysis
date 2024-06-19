@@ -2,6 +2,12 @@ import requests
 from bs4 import BeautifulSoup
 import verify
 
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+import time
+
 # from serpapi import GoogleSearch
 
 def scrape_article(link):
@@ -15,9 +21,29 @@ def scrape_article(link):
         dict: A dictionary containing the title, body text.
     """
 
+    # Set up the Selenium WebDriver
+    options = Options()
+    options.add_argument("--headless=new")
+    driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+    # driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+
+    # Load the webpage
+    # url = 'https://example.com'
+    driver.get(link)
+
+    # Wait for the JavaScript to execute and the page to fully load
+    time.sleep(2)  # You can adjust the sleep time based on the page load time
+
+    # Get the page source after JavaScript execution
+    page_source = driver.page_source
+
+    # Parse the page source with BeautifulSoup
+    soup = BeautifulSoup(page_source, 'html.parser')
+
+
     # Scrape the page
-    page = requests.get(link)
-    soup = BeautifulSoup(page.content, 'html.parser')
+    # page = requests.get(link)
+    # soup = BeautifulSoup(page.content, 'html.parser')
 
     # Extract the title
     # title = soup.find('h1').text.strip()
@@ -81,4 +107,4 @@ def Scrape_links(stock,location='US'):
 # Test
 # Scrape_links('Infosys','IN')
 # Scrape_links('Infosys','US')
-print(scrape_article('https://timesofindia.indiatimes.com/business/india-business/infosys-wins-100-million-ikea-deal/articleshow/111007179.cms'))
+# print(scrape_article('https://timesofindia.indiatimes.com/business/india-business/infosys-wins-100-million-ikea-deal/articleshow/111007179.cms'))

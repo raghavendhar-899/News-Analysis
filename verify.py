@@ -1,10 +1,10 @@
-import pathlib
-import textwrap
+# import pathlib
+# import textwrap
 
 from google import generativeai as genai
 
-from IPython.display import display
-from IPython.display import Markdown
+# from IPython.display import display
+# from IPython.display import Markdown
 
 import os
 from dotenv import load_dotenv
@@ -16,9 +16,9 @@ genai.configure(api_key=os.getenv('GOOGLE_API_KEY_VERIFY'))
 model = genai.GenerativeModel(model_name='gemini-1.5-flash')
 
 
-def to_markdown(text):
-  text = text.replace('•', '  *')
-  return Markdown(textwrap.indent(text, '> ', predicate=lambda _: True))
+# def to_markdown(text):
+#   text = text.replace('•', '  *')
+#   return Markdown(textwrap.indent(text, '> ', predicate=lambda _: True))
 
 
 
@@ -36,14 +36,17 @@ def stockify(list, company):
     for i in list:
       t+=1
       print(t)
-      if t>=10:
+      if t>=15:
          break
       query=base_query+i[0]
       print('query:\n',query)
-      response = model.generate_content(query)
-      result = True if response.text[0]=='T' else False
-      if result:
-         stockified_articals.append(i)
+      try:
+        response = model.generate_content(query)
+        result = True if response.text[0]=='T' else False
+        if result:
+          stockified_articals.append(i)
+      except:
+         print('Limit Exceeded')
       print("result:\n", result)
     return stockified_articals
 
