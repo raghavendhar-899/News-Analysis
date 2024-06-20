@@ -31,14 +31,22 @@ def scrape_article(link):
     # url = 'https://example.com'
     driver.get(link)
 
+    print('Driver done')
+
     # Wait for the JavaScript to execute and the page to fully load
     time.sleep(2)  # You can adjust the sleep time based on the page load time
+
+    print("sleep done")
 
     # Get the page source after JavaScript execution
     page_source = driver.page_source
 
+    print("page source done")
+
     # Parse the page source with BeautifulSoup
     soup = BeautifulSoup(page_source, 'html.parser')
+
+    print("soup done")
 
 
     # Scrape the page

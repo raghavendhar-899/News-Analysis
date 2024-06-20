@@ -30,9 +30,11 @@ def get_summary(text):
     Returns:
         str: The summarized text.
     """
-    # print('inside')
+    print('inside get_summary-----------')
     # Load the BART summarization model
     summarizer = pipeline("summarization",model='sshleifer/distilbart-cnn-12-6')
+
+    print('model imported!!!--------------')
 
     # tokenizer = AutoTokenizer.from_pretrained("valhalla/bart-large-finetuned-squadv1")
 
@@ -40,6 +42,8 @@ def get_summary(text):
 
     # Generate the summary
     summary = summarizer(text[:1000], max_length=60, min_length=20, do_sample=False)[0]["summary_text"]
+
+    print('summary completted inside function----------')
 
     # print(summary,'summary')
 
