@@ -2,22 +2,15 @@
 import torch
 from transformers import pipeline, AutoTokenizer
 
-# import pathlib
-# import textwrap
 
-from google import generativeai as genai
-
-# from IPython.display import display
-# from IPython.display import Markdown
+import requests
 
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-genai.configure(api_key=os.getenv('GOOGLE_API_KEY_SCORE'))
-
-model = genai.GenerativeModel(model_name='gemini-1.5-flash')
+summarizer = pipeline("summarization",model='sshleifer/distilbart-cnn-12-6')
 
 # Define the function to generate a summary of the provided text
 def get_summary(text):
@@ -30,32 +23,21 @@ def get_summary(text):
     Returns:
         str: The summarized text.
     """
-    print('inside get_summary-----------')
-    # Load the BART summarization model
-    summarizer = pipeline("summarization",model='sshleifer/distilbart-cnn-12-6')
-
-    print('model imported!!!--------------')
-
-    # tokenizer = AutoTokenizer.from_pretrained("valhalla/bart-large-finetuned-squadv1")
-
-    # text = tokenizer(text, padding=1000, truncation=True)
 
     # Generate the summary
     summary = summarizer(text[:1000], max_length=60, min_length=20, do_sample=False)[0]["summary_text"]
 
-    print('summary completted inside function----------')
-
-    # print(summary,'summary')
+    print(summary[1:8])
+    if summary[1:8]=="CNN.com":
+       return "Unable to summarize..."
 
     return summary
 
 
-# def to_markdown(text):
-#   text = text.replace('•', '  *')
-#   return Markdown(textwrap.indent(text, '> ', predicate=lambda _: True))
-
 def get_score(text = "no artical found return 0",company = 'no company return 0'):
-#    base_query=f'Please just answer either true or false it the following artical heading effect stock price of {company}.\n'
+   
+   GOOGLE_API_KEY=os.getenv('GOOGLE_API_KEY_SCORE')
+   
    query = f"""
    Identify the sentiment towards the {company} stocks of the news article from -10 to +10 where -10 being the most negative and +10 being the most positve , and 0 being neutral
 
@@ -63,12 +45,24 @@ def get_score(text = "no artical found return 0",company = 'no company return 0'
 
    Article : {text}
    """
-
-   print(query[:10])
-
-   response = model.generate_content(query)
+   url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GOOGLE_API_KEY}'
+   headers = {
+    'Content-Type': 'application/json'
+    }
+   
+   data = {
+         "contents": [{
+        "parts":[{
+          "text": query}]}]
+      }
    try:
-    score = int(response.text)
+    response = requests.post(url, headers=headers, json=data)
+    json_response = response.json()
+   except:
+     print('Limit reched')
+     score = 0
+   try:
+    score = int(json_response["candidates"][0]["content"]["parts"][0]["text"])
    except:
       print('error score')
       return 0

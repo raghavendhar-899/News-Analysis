@@ -1,24 +1,11 @@
-# import pathlib
-# import textwrap
-
-from google import generativeai as genai
-
-# from IPython.display import display
-# from IPython.display import Markdown
+import requests
 
 import os
 from dotenv import load_dotenv
 
+# import concurrent.futures
+
 load_dotenv()
-
-genai.configure(api_key=os.getenv('GOOGLE_API_KEY_VERIFY'))
-
-model = genai.GenerativeModel(model_name='gemini-1.5-flash')
-
-
-# def to_markdown(text):
-#   text = text.replace('•', '  *')
-#   return Markdown(textwrap.indent(text, '> ', predicate=lambda _: True))
 
 
 
@@ -30,9 +17,14 @@ def stockify(list, company):
 
     By using gemini api
     '''
-    stockified_articals=[]
+    GOOGLE_API_KEY=os.getenv('GOOGLE_API_KEY_VERIFY')
+    stockified_articles=[]
     base_query=f'Please just answer either true or false it the following artical heading effect stock price of {company}.\n'
     t=0
+    url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GOOGLE_API_KEY}'
+    headers = {
+    'Content-Type': 'application/json'
+    }
     for i in list:
       t+=1
       print(t)
@@ -40,15 +32,23 @@ def stockify(list, company):
          break
       query=base_query+i[0]
       print('query:\n',query)
+      data = {
+         "contents": [{
+        "parts":[{
+          "text": query}]}]
+      }
+      result=False
       try:
-        response = model.generate_content(query)
-        result = True if response.text[0]=='T' else False
+        # response = verify_model.generate_content(query)
+        response = requests.post(url, headers=headers, json=data)
+        json_response = response.json()
+        result = True if json_response["candidates"][0]["content"]["parts"][0]["text"][0]=='T' else False
         if result:
-          stockified_articals.append(i)
+          stockified_articles.append(i)
       except:
          print('Limit Exceeded')
       print("result:\n", result)
-    return stockified_articals
+    return stockified_articles
 
 
 #Test
