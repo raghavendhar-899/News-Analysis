@@ -1,6 +1,7 @@
 import json
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from article import article
 
 import main
 
@@ -15,10 +16,16 @@ CORS(app, resources={
     }
 })
 
-@app.route("/<string:company>/<string:country>", methods=['GET'])
-def get_stock_data(company,country):
-    data = main.main(company,country)
+@app.route("/<string:company>", methods=['GET'])
+def get_stock_data(company):
+    articleobj = article(company)
+    data = articleobj.get_all_article()
     return jsonify({"Data":data})
+
+@app.route("/start", methods=['GET'])
+def start_scraping():
+    main.start()
+    return None
 
 
 if __name__ == '__main__':
