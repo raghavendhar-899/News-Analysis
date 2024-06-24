@@ -8,6 +8,8 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 
+from datetime import datetime
+
 
 class WebDriverSingleton:
     _instance = None
@@ -90,8 +92,6 @@ def scrape_article(link):
 
     return body_text
 
-# Instantiate the WebDriverSingleton
-webdriver_singleton = WebDriverSingleton()
 
 #Test
 # Link='https://www.defenseworld.net/2024/05/28/infosys-limited-nyseinfy-shares-acquired-by-eversource-wealth-advisors-llc.html'
@@ -118,12 +118,13 @@ def Scrape_links(stock,location='US'):
         # Find the datetime element that follows the current link element
         datetime_element = link.find_next('time', class_='hvbAAd')
         if datetime_element:
-            datetime = datetime_element['datetime']
+            datetime_str = datetime_element['datetime']
+            date_time_obj = datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%SZ")
         else:
             print('No datetime element found')
-            datetime = None
+            date_time_obj = None
 
-        links.append([heading, href, datetime])
+        links.append([heading, href, date_time_obj])
 
     
     # Print the total number of links

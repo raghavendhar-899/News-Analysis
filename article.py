@@ -6,7 +6,7 @@ class article:
     def __init__(self, collection_name):
         self.db = get_database()
         self.news_collection = self.db[collection_name]
-        self.news_collection.create_index([('date', ASCENDING)], expireAfterSeconds=100)
+        self.news_collection.create_index([('date', ASCENDING)], expireAfterSeconds=345600)
 
     def insert_article(self, title, link, date, summary, score):
         article = {
