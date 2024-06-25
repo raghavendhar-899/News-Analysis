@@ -45,6 +45,19 @@ def new_company():
     companyobj.insert_company(name, locations, score, primary_location)
     return 'Received POST request'
 
+@app.route('/suggestions', methods=['GET'])
+def get_suggestions():
+    query = request.args.get('query', '').strip()
+    companyobj = company()
+    if query:
+        suggestions = companyobj.get_company_name_suggestions(query)
+        # print(suggestions,type(suggestions),suggestions[0])
+        suggestions=jsonify(suggestions)
+        # print(suggestions,type(suggestions))
+        return suggestions
+    else:
+        return jsonify([])
+
 
 if __name__ == '__main__':
    app.run(port=8080)

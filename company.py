@@ -27,3 +27,8 @@ class company:
     def get_all_company_names(self):
         companies = self.companies_collection.find({}, {"name": 1, "primary_location": 1})
         return [(company["name"], company["primary_location"]) for company in companies]
+    
+    def get_company_name_suggestions(self, query):
+        regex_query = {"name": {"$regex": f'^{query}', "$options": 'i'}}
+        suggestions = self.companies_collection.find(regex_query, {"name": 1}).limit(10)
+        return [company["name"] for company in suggestions]
