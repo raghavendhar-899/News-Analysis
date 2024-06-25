@@ -11,7 +11,7 @@ def main(company,country):
     data_to_be_processed=[]
     articleobj = article(company)
     for i in data:
-        print(i[0],'[[[[[[[[[[]]]]]]]]]]')
+        print(i[0])
         if not articleobj.find_article(i[0]):
             data_to_be_processed.append(i)
     data = verify.stockify(data_to_be_processed,company)
@@ -42,10 +42,19 @@ def start():
                 time.sleep(40)
                 continue
             score = calculate_score(data[0])
+            print('Score = ---------',score)
             companyobj.update_company_score(data[0],score)
         
 def calculate_score(company):
-    return 1
+    articleobj = article(company)
+    scores = articleobj.get_all_article_scores()
+    valid_count = 0
+    totalscore = 0
+    for i in scores:
+        if i!='--':
+            valid_count+=1
+            totalscore+=i
+    return totalscore/valid_count
 
 
 def get_article_data(company,location):

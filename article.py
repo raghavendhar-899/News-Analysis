@@ -26,3 +26,7 @@ class article:
 
     def get_all_article(self):
         return list(self.news_collection.find({}, {"_id": 0}))
+    
+    def get_all_article_scores(self):
+        articles = self.news_collection.find({}, {"_id": 0, "score": 1})
+        return [article["score"] for article in articles]

@@ -2,9 +2,10 @@ import json
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from article import article
+from company import company
 
 import main
-from company import company
+
 
 app = Flask(__name__)
 
@@ -17,13 +18,14 @@ CORS(app, resources={
     }
 })
 
-@app.route("/<string:company>", methods=['GET'])
-def get_stock_data(company):
-    articleobj = article(company)
+@app.route("/<string:companyname>", methods=['GET'])
+def get_stock_data(companyname):
+    articleobj = article(companyname)
+    companyobj = company()
     data = articleobj.get_all_article()
     sorted_articles = sorted(data, key=lambda x: x['date'], reverse=True)
-    print(data[:10])
-    return jsonify({"Data":sorted_articles})
+    score = companyobj.find_company(companyname)['score']
+    return jsonify({"Data":sorted_articles, "score":score})
 
 @app.route("/start", methods=['GET'])
 def start_scraping():
