@@ -102,6 +102,7 @@ def Scrape_links(stock,location='US'):
     links = []
 
     base_url='https://news.google.com'
+    print(stock,location)
     url = base_url+'/search?q=' + stock +'%20when%3A1d'+ '&gl='+location
     response = requests.get(url)
 

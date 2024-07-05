@@ -6,11 +6,12 @@ class company:
         self.db = get_database()
         self.companies_collection = self.db.companies
 
-    def insert_company(self, name, locations, score, primary_location):
+    def insert_company(self, name, ticker, locations, score, primary_location):
         company = {
             "name": name,
             "primary_location": primary_location,
             "locations": locations,
+            "ticker": ticker,
             "score": score
         }
         return self.companies_collection.insert_one(company)
@@ -29,6 +30,11 @@ class company:
         return [(company["name"], company["primary_location"]) for company in companies]
     
     def get_company_name_suggestions(self, query):
-        regex_query = {"name": {"$regex": f'^{query}', "$options": 'i'}}
+        regex_query = {
+        "$or": [
+            {"name": {"$regex": f'^{query}', "$options": 'i'}},
+            {"ticker": {"$regex": f'^{query}', "$options": 'i'}}
+        ]
+    }
         suggestions = self.companies_collection.find(regex_query, {"name": 1}).limit(10)
         return [company["name"] for company in suggestions]

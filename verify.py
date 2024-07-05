@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import requests
 
 import os
@@ -7,7 +9,7 @@ load_dotenv()
 
 
 
-def stockify(list, company):
+def stockify(list, company,isnew):
     '''
     list: list of article headings
     
@@ -15,8 +17,19 @@ def stockify(list, company):
 
     By using gemini api
     '''
-    GOOGLE_API_KEY_VERIFY1=os.getenv('GOOGLE_API_KEY_VERIFY1')
-    GOOGLE_API_KEY_VERIFY2=os.getenv('GOOGLE_API_KEY_VERIFY2')
+       # Get the current datetime
+    if isnew:
+      GOOGLE_API_KEY_VERIFY1=os.getenv('GOOGLE_API_KEY_VERIFY1_N')
+      GOOGLE_API_KEY_VERIFY2=os.getenv('GOOGLE_API_KEY_VERIFY2_N')
+    else:
+      now = datetime.now()
+
+      # Extract the hour in 24-hour format
+      current_hour = now.hour
+      print('current_hour = ',current_hour)
+
+      GOOGLE_API_KEY_VERIFY1=os.getenv(f'GOOGLE_API_KEY_VERIFY1_{current_hour}')
+      GOOGLE_API_KEY_VERIFY2=os.getenv(f'GOOGLE_API_KEY_VERIFY2_{current_hour}')
     stockified_articles=[]
     base_query=f'Please just answer either true or false it the following artical heading effect stock price of {company}.\n'
     t=0
@@ -49,8 +62,10 @@ def stockify(list, company):
         result = True if json_response["candidates"][0]["content"]["parts"][0]["text"][0]=='T' else False
         if result:
           stockified_articles.append(i)
-      except:
+      except Exception as e:
          print('Limit Exceeded')
+         print(json_response)
+         print(e)
       print("result:\n", result)
     return stockified_articles
 

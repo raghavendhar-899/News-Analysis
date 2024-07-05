@@ -6,7 +6,7 @@ from article import article
 import time
 
 # Defining main function 
-def main(company,country):
+def main(company,country,isnew=False):
     data = scrape.Scrape_links(company,country)
     data_to_be_processed=[]
     articleobj = article(company)
@@ -14,7 +14,7 @@ def main(company,country):
         print(i[0])
         if not articleobj.find_article(i[0]):
             data_to_be_processed.append(i)
-    data = verify.stockify(data_to_be_processed,company)
+    data = verify.stockify(data_to_be_processed,company,isnew)
     for i in range(len(data)):
 
         print('artical',i)
@@ -25,7 +25,7 @@ def main(company,country):
         if body_text:
             summary = get_summary(body_text)
             print('summary done')
-            score = get_score(body_text,company)
+            score = get_score(body_text,company,isnew)
             print('score done \n')
         data[i].append(summary)
         data[i].append(score)
@@ -44,6 +44,13 @@ def start():
             score = calculate_score(data[0])
             print('Score = ---------',score)
             companyobj.update_company_score(data[0],score)
+
+def new_company(name,location):
+    get_article_data(name,location,True)
+    companyobj = company()
+    score = calculate_score(name)
+    print('Score = ---------',score)
+    companyobj.update_company_score(name,score)
         
 def calculate_score(company):
     articleobj = article(company)
@@ -54,11 +61,13 @@ def calculate_score(company):
         if i!='--':
             valid_count+=1
             totalscore+=i
-    return totalscore/valid_count
+    if valid_count>0:
+        return totalscore/valid_count
+    return 0
 
 
-def get_article_data(company,location):
-    article_data = main(company,location)
+def get_article_data(company,location,isnew=False):
+    article_data = main(company,location,isnew)
     articleobj = article(company)
     for i in article_data:
         articleobj.insert_article(i[0],i[1],i[2],i[3],i[4])

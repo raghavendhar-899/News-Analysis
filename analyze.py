@@ -1,6 +1,7 @@
 # Import necessary libraries
 import torch
 from transformers import pipeline, AutoTokenizer
+from datetime import datetime
 
 
 import requests
@@ -34,9 +35,18 @@ def get_summary(text):
     return summary
 
 
-def get_score(text = "no artical found return 0",company = 'no company return 0'):
+def get_score(text = "no artical found return 0",company = 'no company return 0',isnew=False):
    
-   GOOGLE_API_KEY=os.getenv('GOOGLE_API_KEY_SCORE')
+   if isnew:
+    GOOGLE_API_KEY=os.getenv('GOOGLE_API_KEY_SCORE_N')
+   else:
+    # Get the current datetime
+    now = datetime.now()
+
+    # Extract the hour in 24-hour format
+    current_hour = now.hour
+   
+    GOOGLE_API_KEY=os.getenv(f'GOOGLE_API_KEY_SCORE_{current_hour}')
    
    query = f"""
    Identify the sentiment towards the {company} stocks of the news article from -10 to +10 where -10 being the most negative and +10 being the most positve , and 0 being neutral
