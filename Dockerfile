@@ -8,6 +8,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install any dependencies specified in requirements.txt
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code into the container
@@ -20,4 +21,4 @@ EXPOSE 5000
 ENV FLASK_APP=api.py
 
 # Command to run the application
-CMD ["flask", "run", "--host=0.0.0.0"]
+CMD ["python3","app/app.py"]
