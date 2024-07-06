@@ -61,6 +61,10 @@ def get_suggestions():
         return suggestions
     else:
         return jsonify([])
+    
+@app.route("/test", methods=['GET'])
+def test():
+    return "Up and running"
 
 
 if __name__ == '__main__':
