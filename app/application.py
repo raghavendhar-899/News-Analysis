@@ -8,7 +8,9 @@ from threading import Thread
 import main
 
 
-app = Flask(__name__)
+application = Flask(__name__)
+
+app = application
 
 CORS(app, resources={
     r"/*": {
