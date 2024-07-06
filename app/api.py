@@ -26,9 +26,8 @@ def get_stock_data(companyname):
     data = articleobj.get_all_article()
     if not data:
         return make_response('', 404)
-    sorted_articles = sorted(data, key=lambda x: x['date'], reverse=True)
     score = companyobj.find_company(companyname)['score']
-    return jsonify({"Data":sorted_articles, "score":score})
+    return jsonify({"Data":data, "score":score})
 
 @app.route("/start", methods=['GET'])
 def start_scraping():

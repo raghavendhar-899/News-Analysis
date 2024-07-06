@@ -25,7 +25,9 @@ class article:
         return self.news_collection.delete_one({"title": title})
 
     def get_all_article(self):
-        return list(self.news_collection.find({}, {"_id": 0}))
+        sort=list({'date': -1}.items())
+        # return list(self.news_collection.find({}, sort=sort))
+        return list(self.news_collection.find({}, {"_id": 0},sort=sort))
     
     def get_all_article_scores(self):
         articles = self.news_collection.find({}, {"_id": 0, "score": 1})
