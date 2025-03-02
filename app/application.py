@@ -14,14 +14,14 @@ app = application
 
 CORS(app, resources={
     r"/*": {
-        "origins": "http://localhost:3000",
+        "origins": "*",
         "methods": ["GET", "POST"],
         "allow_headers": ["Content-Type", "Authorization"],
         "supports_credentials": True
     }
 })
 
-@app.route("/<string:companyname>", methods=['GET'])
+@app.route("/<string:companyname>", methods=['GET']) # This route is for getting the News data of a company
 def get_stock_data(companyname):
     articleobj = article(companyname)
     companyobj = company()
@@ -31,12 +31,8 @@ def get_stock_data(companyname):
     score = companyobj.find_company(companyname)['score']
     return jsonify({"Data":data, "score":score})
 
-@app.route("/start", methods=['GET'])
-def start_scraping():
-    main.start()
-    return None
 
-@app.route("/newcompany", methods=['POST'])
+@app.route("/newcompany", methods=['POST']) # This route is for adding a new company
 def new_company():
     data = request.json
     name = data.get('name')
@@ -52,7 +48,7 @@ def new_company():
     thread.start()
     return make_response('', 201)  # 201 Created
 
-@app.route('/suggestions', methods=['GET'])
+@app.route('/suggestions', methods=['GET']) # This route is for the search suggestions
 def get_suggestions():
     query = request.args.get('query', '').strip()
     companyobj = company()
@@ -64,10 +60,20 @@ def get_suggestions():
     else:
         return jsonify([])
     
+@app.route("/start", methods=['GET']) # This route is for starting the scraping process
+def start_scraping():
+    main.start()
+    return None
+    
 @app.route("/test", methods=['GET'])
 def test():
     return "Up and running"
 
+@app.route("/health", methods=['GET'])
+def health():
+    return make_response('', 200)
+
 
 if __name__ == '__main__':
-   app.run(port=8080)
+#    app.run(port=8080)
+    app.run(host='0.0.0.0', port=8080)

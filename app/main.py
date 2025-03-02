@@ -12,11 +12,10 @@ def main(company,country,isnew=False):
     articleobj = article(company)
     for i in data:
         print(i[0])
-        if not articleobj.find_article(i[0]):
+        if not articleobj.find_article(i[0]): # if article is not already present in the database
             data_to_be_processed.append(i)
     data = verify.stockify(data_to_be_processed,company,isnew)
     for i in range(len(data)):
-
         print('artical',i)
         body_text = scrape.scrape_article(data[i][1])
         print('scrapeing done')
@@ -25,7 +24,7 @@ def main(company,country,isnew=False):
         if body_text:
             summary = get_summary(body_text)
             print('summary done')
-            score = get_score(body_text,company,isnew)
+            score = get_score(data[i][0],body_text,company,isnew)
             print('score done \n')
         data[i].append(summary)
         data[i].append(score)
@@ -36,11 +35,12 @@ def start():
     print('init')
     while True:
         companies = companyobj.get_all_company_names()
+        companies=companies[::-1]
         print('all companies retrived ***************')
         for data in companies:
             if not get_article_data(data[0],data[1]):
                 time.sleep(40)
-                continue
+                # continue
             score = calculate_score(data[0])
             print('Score = ---------',score)
             companyobj.update_company_score(data[0],score)

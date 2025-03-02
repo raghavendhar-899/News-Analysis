@@ -47,6 +47,7 @@ class WebDriverSingleton:
 
 # Instantiate the WebDriverSingleton
 webdriver_singleton = WebDriverSingleton()
+print('web driver created')
 
 
 
@@ -76,8 +77,9 @@ def scrape_article(link):
         # Get the page source after JavaScript execution
         page_source = driver.page_source
     
-    except:
+    except Exception as e:
         print("Timed out waiting for page to load")
+        print(e)
         return None
 
     # Parse the page source with BeautifulSoup
