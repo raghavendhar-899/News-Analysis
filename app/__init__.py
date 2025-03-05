@@ -2,7 +2,7 @@ from flask import Flask
 # from flask_migrate import Migrate
 from flask_cors import CORS
 from app.utils.database import get_database as db
-from app.api import application
+from app.api import news
 
 # def create_app(config_class=Config):
 def create_app():
@@ -23,7 +23,7 @@ def create_app():
     # Migrate(app, db)
 
     # Register blueprints
-    app.register_blueprint(application.bp)
+    app.register_blueprint(news.bp)
     # app.register_blueprint(users.bp)
 
     # Register error handlers

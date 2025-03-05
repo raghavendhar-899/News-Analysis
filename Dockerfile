@@ -14,7 +14,7 @@ RUN wget -O /tmp/chromedriver.zip http://chromedriver.storage.googleapis.com/`cu
 RUN unzip /tmp/chromedriver.zip chromedriver -d /usr/local/bin/
 
 # Set the working directory in the container
-WORKDIR /app
+WORKDIR /
 
 # Copy the requirements file into the container
 COPY requirements.txt .
@@ -33,4 +33,4 @@ EXPOSE 8080
 # ENV FLASK_APP=api.py
 
 # Command to run the application
-CMD ["python3","application.py"]
+CMD ["flask","run","--port","8080"]

@@ -75,7 +75,7 @@ def get_score(title='No title return 0',text = "no artical found return 0",compa
     query = f"""
    Identify the sentiment towards the {company} stocks of the news article from -10 to +10 where -10 being the most negative and +10 being the most positve , and 0 being neutral
 
-   GIVE ANSWER IN ONLY ONE WORD AND THAT SHOULD BE THE SCORE
+   GIVE ANSWER IN ONLY ONE NUMBER AND THAT SHOULD BE THE SCORE
 
    Article Title : {title}
 

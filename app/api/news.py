@@ -12,7 +12,7 @@ from app.services import main
 
 # app = application
 
-bp = Blueprint('users', __name__, url_prefix='')
+bp = Blueprint('news', __name__, url_prefix='')
 
 
 
