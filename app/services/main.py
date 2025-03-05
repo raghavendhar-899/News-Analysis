@@ -1,8 +1,8 @@
-from analyze import get_summary,get_score
-import scrape
-import verify
-from company import company
-from article import article
+from app.services.analyze import get_summary,get_score
+from app.services import scrape
+from app.services import verify
+from app.repository.company import company
+from app.repository.article import article
 import time
 
 # Defining main function 

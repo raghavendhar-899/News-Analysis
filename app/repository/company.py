@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from database import get_database
+from app.utils.database import get_database
 
 class company:
     def __init__(self):

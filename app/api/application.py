@@ -1,28 +1,24 @@
 import json
-from flask import Flask, jsonify, request, make_response
+from flask import Blueprint, Flask, jsonify, request, make_response
 from flask_cors import CORS
-from article import article
-from company import company
+from app.repository.article import article
+from app.repository.company import company
 from threading import Thread
 
-import main
+from app.services import main
 
 
-application = Flask(__name__)
+# application = Flask(__name__)
 
-app = application
+# app = application
 
-CORS(app, resources={
-    r"/*": {
-        "origins": "*",
-        "methods": ["GET", "POST"],
-        "allow_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": True
-    }
-})
+bp = Blueprint('users', __name__, url_prefix='')
 
-@app.route("/<string:companyname>", methods=['GET']) # This route is for getting the News data of a company
+
+
+@bp.route("/<string:companyname>", methods=['GET']) # This route is for getting the News data of a company
 def get_stock_data(companyname):
+    print(companyname)
     articleobj = article(companyname)
     companyobj = company()
     data = articleobj.get_all_article()
@@ -32,7 +28,7 @@ def get_stock_data(companyname):
     return jsonify({"Data":data, "score":score})
 
 
-@app.route("/newcompany", methods=['POST']) # This route is for adding a new company
+@bp.route("/newcompany", methods=['POST']) # This route is for adding a new company
 def new_company():
     data = request.json
     name = data.get('name')
@@ -48,7 +44,7 @@ def new_company():
     thread.start()
     return make_response('', 201)  # 201 Created
 
-@app.route('/suggestions', methods=['GET']) # This route is for the search suggestions
+@bp.route('/suggestions', methods=['GET']) # This route is for the search suggestions
 def get_suggestions():
     query = request.args.get('query', '').strip()
     companyobj = company()
@@ -60,20 +56,21 @@ def get_suggestions():
     else:
         return jsonify([])
     
-@app.route("/start", methods=['GET']) # This route is for starting the scraping process
+@bp.route("/start", methods=['GET']) # This route is for starting the scraping process
 def start_scraping():
+    print("Starting the scraping process")
     main.start()
     return None
     
-@app.route("/test", methods=['GET'])
+@bp.route("/test", methods=['GET'])
 def test():
     return "Up and running"
 
-@app.route("/health", methods=['GET'])
+@bp.route("/health", methods=['GET'])
 def health():
     return make_response('', 200)
 
 
-if __name__ == '__main__':
-#    app.run(port=8080)
-    app.run(host='0.0.0.0', port=8080)
+# if __name__ == '__main__':
+# #    app.run(port=8080)
+#     app.run(host='0.0.0.0', port=8080)
