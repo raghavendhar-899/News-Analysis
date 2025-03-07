@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from app.services import verify
+from services import verify
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService

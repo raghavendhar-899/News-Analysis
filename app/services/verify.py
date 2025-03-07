@@ -22,7 +22,7 @@ def stockify(list, company,isnew):
    '''
 
    stockified_articles=[]
-   base_query=f'Please just answer either true or false it the following artical heading effect stock price of {company}.\n'
+   base_query=f'Please just answer either true or false and nothing else. is the following artical heading effect stock price of {company}.\n'
    
    # ------------------ Google gemini api -------------------
 
@@ -90,6 +90,7 @@ def stockify(list, company,isnew):
          },
          ])
          result=False
+         print('response',response['message']['content'])
          result = True if response['message']['content'][0]=='T' else False
          print('result:',result)
          if result:

@@ -14,14 +14,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 OLLAMA_MODEL = os.getenv('OLLAMA_MODEL')
+print('Ollama model = ',OLLAMA_MODEL)
 
 
 
 
-try:
-    summarizer = pipeline("summarization",model='sshleifer/distilbart-cnn-12-6', device="mps")
-except:
-    print('Network Error')
+# try:
+#     summarizer = pipeline("summarization",model='sshleifer/distilbart-cnn-12-6', device="mps")
+# except:
+#     print('Network Error')
 
 # Define the function to generate a summary of the provided text
 def get_summary(text):
@@ -38,36 +39,36 @@ def get_summary(text):
     # Generate the summary
 
     # ------------------ Hugging Face API -------------------
-    summary = 'Unable to summarize...'
-    try: 
-        summary = summarizer(text[:1000], max_length=60, min_length=20, do_sample=False)[0]["summary_text"]
+    # summary = 'Unable to summarize...'
+    # try: 
+    #     summary = summarizer(text[:1000], max_length=60, min_length=20, do_sample=False)[0]["summary_text"]
 
-        print(summary[1:8])
-        if summary[1:8]=="CNN.com":
-            return "Unable to summarize..."
-    except  Exception as e:
-        print(e)
-        print('Summerizer Failed to load')
+    #     print(summary[1:8])
+    #     if summary[1:8]=="CNN.com":
+    #         return "Unable to summarize..."
+    # except  Exception as e:
+    #     print(e)
+    #     print('Summerizer Failed to load')
 
-    return summary
+    # return summary
 
     # ------------------ Ollama API -------------------
 
-    # query = f"""
-    # Summarize the following article into 30 words or less:
-    # {text}
-    # """
+    query = f"""
+    Summarize the following article with in 30 words or less:
+    {text}
+    """
 
-    # response = ollama.chat(model=OLLAMA_MODEL, messages=[
-    # {
-    #     'role': 'user',
-    #     'content': query,
-    # },
-    # ])
+    response = ollama.chat(model=OLLAMA_MODEL, messages=[
+    {
+        'role': 'user',
+        'content': query,
+    },
+    ])
 
-    # print('response',response)
-    # summary = response['message']['content']
-    # return summary
+    print('response',response)
+    summary = response['message']['content']
+    return summary
 
 
 def get_score(title='No title return 0',text = "no artical found return 0",company = 'no company return 0',isnew=False):

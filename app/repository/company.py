@@ -1,7 +1,7 @@
 from pymongo import MongoClient
-from app.utils.database import get_database
+from utils.database import get_database
 
-class company:
+class Company:
     def __init__(self):
         self.db = get_database()
         self.companies_collection = self.db.companies
