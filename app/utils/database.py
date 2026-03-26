@@ -8,12 +8,16 @@ load_dotenv()
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 
+import logging
+from app.utils.logger import get_logger
 
-print('mongo started')
+logger = get_logger(__name__)
+
+logger.info('mongo started')
 
 client = MongoClient(DATABASE_URL, tlsCAFile=certifi.where())
 
-print('mongo client created')
+logger.info('mongo client created')
 
 def get_database():
 

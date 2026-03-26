@@ -1,6 +1,6 @@
 from pymongo import MongoClient, ASCENDING
 from datetime import datetime, timedelta
-from utils.database import get_database
+from app.utils.database import get_database
 
 class Article:
     def __init__(self, collection_name):

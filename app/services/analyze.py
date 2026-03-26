@@ -14,7 +14,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 OLLAMA_MODEL = os.getenv('OLLAMA_MODEL')
-print('Ollama model = ',OLLAMA_MODEL)
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
+logger.info('Ollama model = %s', OLLAMA_MODEL)
 
 
 
@@ -65,22 +68,20 @@ def get_summary(text):
         'content': query,
     },
     ])
-
-    print('response',response)
+    logger.debug('ollama response: %s', response)
     summary = response['message']['content']
     return summary
 
 
 def get_score(title='No title return 0',text = "no artical found return 0",company = 'no company return 0',isnew=False):
-
+    logger.info('Get_score called for company=%s title=%s', company, title)
     query = f"""
-   Identify the sentiment towards the {company} stocks of the news article from -10 to +10 where -10 being the most negative and +10 being the most positve , and 0 being neutral
+    For the following news article about {company}, assign a sentiment score toward its stock on a scale from -10 to +10. Use -10 for extremely negative sentiment, 0 for neutral, and +10 for extremely positive sentiment. Analyze the content carefully and respond with only a single numerical score (do not include any text or explanation).
 
-   GIVE ANSWER IN ONLY ONE NUMBER AND THAT SHOULD BE THE SCORE
+    Article Title: {title}
 
-   Article Title : {title}
+    Article Text: {text}
 
-   Article : {text}
    """
   
     #   ------------------ Google gemini api -------------------
@@ -129,11 +130,11 @@ def get_score(title='No title return 0',text = "no artical found return 0",compa
         'content': query,
     },
     ])
-    print('response',response)
+    logger.debug('ollama response for scoring: %s', response)
     try:
         score = int(response['message']['content'])
     except:
-        print('error score')
+        logger.exception('error parsing score from response')
         return 0
     return score
 

@@ -10,6 +10,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 OLLAMA_MODEL = os.getenv('OLLAMA_MODEL')
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 
@@ -22,7 +25,10 @@ def stockify(list, company,isnew):
    '''
 
    stockified_articles=[]
-   base_query=f'Please just answer either true or false and nothing else. is the following artical heading effect stock price of {company}.\n'
+   base_query=f"""For the company {company}, determine if the following news headline is likely to have a impact (even slight impact) on its stock price. Consider any market sentiment, tone, or content that could influence investor behavior. Respond strictly with either "True" (if the headline is likely to affect the stock price) or "False" (if it is not). Do not include any extra explanation or commentary.
+      Headline:
+
+      """
    
    # ------------------ Google gemini api -------------------
 
@@ -80,7 +86,7 @@ def stockify(list, company,isnew):
    #  ------------------ Ollama -------------------
 
    for i in list:
-      print('Heading',i[0])
+      logger.debug('Heading: %s', i[0])
       query=base_query+i[0]
       try:
          response = ollama.chat(model=OLLAMA_MODEL, messages=[
@@ -90,14 +96,15 @@ def stockify(list, company,isnew):
          },
          ])
          result=False
-         print('response',response['message']['content'])
+         logger.debug('response: %s', response['message']['content'])
          result = True if response['message']['content'][0]=='T' else False
-         print('result:',result)
+         result = True
+         logger.debug('result: %s', result)
          if result:
             stockified_articles.append(i)
       except Exception as e:
-         print('Ollama error')
-         print(e)
+         logger.error('Ollama error')
+         logger.exception(e)
       
    return stockified_articles
       

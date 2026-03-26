@@ -1,6 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-from services import verify
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
@@ -9,6 +8,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 import time
 
 from datetime import datetime
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class WebDriverSingleton:
@@ -47,7 +49,7 @@ class WebDriverSingleton:
 
 # Instantiate the WebDriverSingleton
 webdriver_singleton = WebDriverSingleton()
-print('web driver created')
+logger.info('web driver created')
 
 
 
@@ -68,27 +70,28 @@ def scrape_article(link):
 
     try:
         driver.get(link)
-
-        print('Driver done')
+        logger.debug('driver.get completed for %s', link)
 
         # Wait for the JavaScript to execute and the page to fully load
-        time.sleep(2)  # You can adjust the sleep time based on the page load time
+        time.sleep(5)  # You can adjust the sleep time based on the page load time
 
         # Get the page source after JavaScript execution
         page_source = driver.page_source
-    
+        logger.debug('page_source length=%d', len(page_source) if page_source else 0)
+
     except Exception as e:
-        print("Timed out waiting for page to load")
-        print(e)
+        logger.error("Timed out waiting for page to load: %s", e)
         return None
 
     # Parse the page source with BeautifulSoup
     soup = BeautifulSoup(page_source, 'html.parser')
+    logger.debug('parsed soup')
 
 
     # Extract the body text
     body_text = []
     for paragraph in soup.find_all('p'):
+        logger.debug('paragraph len=%d', len(paragraph.text.strip()))
         body_text.append(paragraph.text.strip())
     body_text = ' '.join(body_text)
 
@@ -104,7 +107,7 @@ def Scrape_links(stock,location='US'):
     links = []
 
     base_url='https://news.google.com'
-    print(stock,location)
+    logger.info('scraping links for %s (%s)', stock, location)
     url = base_url+'/search?q=' + stock +'%20when%3A1d'+ '&gl='+location
     response = requests.get(url)
 
@@ -124,17 +127,87 @@ def Scrape_links(stock,location='US'):
             datetime_str = datetime_element['datetime']
             date_time_obj = datetime.strptime(datetime_str, "%Y-%m-%dT%H:%M:%SZ")
         else:
-            print('No datetime element found')
+            logger.debug('No datetime element found for link: %s', href)
             date_time_obj = None
 
         links.append([heading, href, date_time_obj])
 
     
     # Print the total number of links
-    print('Total links:', len(links))
+    logger.info('Total links: %d', len(links))
     return links
 
+
+# ------------------ Google News API ------------------
+# def Scrape_links(stock: str, location: str = 'US'):
+#     """
+#     Fetches news articles using Google News API.
+    
+#     Args:
+#         stock (str): The stock symbol or company name to search for
+#         location (str): The country code for news location (default: 'US')
+        
+#     Returns:
+#         List containing [title, url, datetime]
+#     """
+#     # Get API credentials from .env file
+#     api_key = os.getenv('GOOGLE_API_KEY')
+#     cx = os.getenv('GOOGLE_CX')
+    
+#     if not api_key or not cx:
+#         raise ValueError("Google API credentials not found in .env file. Please ensure GOOGLE_API_KEY and GOOGLE_CX are set.")
+    
+#     base_url = "https://www.googleapis.com/customsearch/v1"
+    
+#     # Construct the query
+#     query = f"{stock} News when:1d"
+    
+#     params = {
+#         'key': api_key,
+#         'cx': cx,
+#         'q': query,
+#         'gl': location,
+#         'num': 10,  # Number of results to return
+#         'sort': 'date'  # Sort by date
+#     }
+    
+#     try:
+#         response = requests.get(base_url, params=params)
+#         response.raise_for_status()
+#         data = response.json()
+        
+#         links = []
+#         for item in data.get('items', []):
+#             title = item.get('title', '')
+#             url = item.get('link', '')
+            
+#             # Get the date from the snippet or use current time if not available
+#             date_str = item.get('pagemap', {}).get('metatags', [{}])[0].get('article:published_time')
+#             if date_str:
+#                 try:
+#                     # Try parsing as ISO format first
+#                     date_time_obj = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S%z")
+#                 except ValueError:
+#                     try:
+#                         # Try parsing as Unix timestamp
+#                         date_time_obj = datetime.fromtimestamp(int(date_str))
+#                     except (ValueError, TypeError):
+#                         date_time_obj = None
+#             else:
+#                 date_time_obj = None
+                
+#             links.append([title, url, date_time_obj])
+            
+#         print('Total links:', len(links))
+#         return links
+        
+#     except requests.exceptions.RequestException as e:
+#         print(f"Error fetching news: {e}")
+#         return []
 # Test
 # Scrape_links('Infosys','IN')
 # Scrape_links('Infosys','US')
-# print(scrape_article('https://timesofindia.indiatimes.com/business/india-business/infosys-wins-100-million-ikea-deal/articleshow/111007179.cms'))
+if __name__ == '__main__':
+    test_link = 'https://news.google.com/read/CBMi2AFBVV95cUxNbHU4N25qbjRncTAzZlFma2NQUFBfYmpuVnVrSEdudjBReGNRNlctRUJFLWRnZU9qMWY2NWFoSTZUaW1mSERYRWV4RWwyYTRiRnEtSDFEcFEtdGI1RE1XcDRFOEthYUNlUVJfaExXUkYtWTJrTmJ0THMtY2NrV1JneTQ2M1p2WjAzUmJ6RnhqZWFDOGI2RHBkc0NCaVRXcUxTVEdyZVhPcmEzUTFrRTl1aFZEdG5OUzJ3cUdGaDlhVFQweEt2aDl6ZkVZdUw0M2x4aFR5MEE5c2w?hl=en-AU&gl=AU&ceid=AU%3Aen'
+    logger.info('running scrape_article test')
+    logger.info(scrape_article(test_link))

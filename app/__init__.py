@@ -5,9 +5,13 @@ from flask_jwt_extended import JWTManager
 from app.utils.database import get_database as db
 from app.api import auth, news, users
 from flask_jwt_extended import JWTManager as JWTExtended
+from app.utils.logger import configure_logging
 
 # def create_app(config_class=Config):
 def create_app():
+    # configure logging as early as possible for consistent output
+    configure_logging()
+
     app = Flask(__name__)
     # app.config.from_object(config_class)
     CORS(app, resources={

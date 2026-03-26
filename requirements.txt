@@ -15,4 +15,5 @@ bs4
 selenium
 webdriver_manager
 ollama
+flask_jwt_extended
 # gunicorn
