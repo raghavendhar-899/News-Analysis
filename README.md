@@ -5,8 +5,8 @@ News scraping and sentiment analysis pipeline for the News Analysis platform ("s
 ## Quick Start
 
 ```bash
-python3 -m venv path/to/venv
-source path/to/venv/bin/activate
+python3 -m venv venv
+source venv/bin/activate
 python3 -m pip install -r requirements.txt / pip install -r requirements.txt
 python3 run.py
 ```
@@ -33,9 +33,11 @@ python run.py
 
 | Path | Description |
 |------|-------------|
-| `GET /start` | Start scraping for all companies |
+| `POST /start` | Start scraping for all companies |
 | `GET /test` | Health check |
 | `GET /health` | Liveness |
+
+to start the pipeline: curl -X POST http://127.0.0.1:8081/start   
 
 ## Prerequisites
 

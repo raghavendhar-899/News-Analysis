@@ -10,6 +10,8 @@ import time
 from datetime import datetime
 from app.utils.logger import get_logger
 
+from selenium.common.exceptions import InvalidSessionIdException, TimeoutException, WebDriverException
+
 logger = get_logger(__name__)
 
 
@@ -30,6 +32,8 @@ class WebDriverSingleton:
         self.options.add_argument('--disable-dev-shm-usage')
         self.options.add_argument('--disable-extensions')
         self.options.add_argument('--disable-infobars')
+        # Don't wait for every subresource; reduces renderer timeouts on heavy sites.
+        self.options.set_capability("pageLoadStrategy", "eager")
         prefs = {
     "profile.managed_default_content_settings.javascript": 1,
     "profile.default_content_settings.cookies": 1,
@@ -38,9 +42,29 @@ class WebDriverSingleton:
         self.options.add_experimental_option("prefs", prefs)
         self.service = ChromeService(executable_path=ChromeDriverManager().install())
         self.driver = webdriver.Chrome(service=self.service, options=self.options)
-        self.driver.set_page_load_timeout(5)
+        # 5s is too aggressive for real news sites; keep it higher and handle per-page timeouts.
+        self.driver.set_page_load_timeout(10)
+        self.driver.set_script_timeout(10)
+
+    def _is_driver_healthy(self) -> bool:
+        try:
+            d = getattr(self, "driver", None)
+            if d is None:
+                return False
+            # Any lightweight call that touches the session will do.
+            _ = d.current_url
+            return True
+        except Exception:
+            return False
 
     def get_driver(self):
+        if not self._is_driver_healthy():
+            logger.warning("WebDriver session unhealthy; recreating driver")
+            try:
+                self.quit_driver()
+            except Exception:
+                pass
+            self.initialize_webdriver()
         return self.driver
 
     def quit_driver(self):
@@ -50,7 +74,6 @@ class WebDriverSingleton:
 # Instantiate the WebDriverSingleton
 webdriver_singleton = WebDriverSingleton()
 logger.info('web driver created')
-
 
 
 
@@ -79,8 +102,43 @@ def scrape_article(link):
         page_source = driver.page_source
         logger.debug('page_source length=%d', len(page_source) if page_source else 0)
 
-    except Exception as e:
+    except TimeoutException as e:
+        # Page didn't fully load within page_load_timeout; stop loading and salvage HTML.
         logger.error("Timed out waiting for page to load: %s", e)
+        try:
+            driver.execute_script("window.stop();")
+            page_source = driver.page_source
+            logger.debug(
+                'page_source length after window.stop=%d',
+                len(page_source) if page_source else 0,
+            )
+        except Exception:
+            return None
+
+    except (InvalidSessionIdException, WebDriverException) as e:
+        # Chrome/driver crashed or session got invalid (common in long-running jobs).
+        logger.error("WebDriver session error for %s: %s", link, e)
+        try:
+            webdriver_singleton.quit_driver()
+        except Exception:
+            pass
+        try:
+            webdriver_singleton.initialize_webdriver()
+        except Exception:
+            logger.exception("Failed to recreate WebDriver")
+            return None
+        # Retry once with fresh driver.
+        try:
+            driver = webdriver_singleton.get_driver()
+            driver.get(link)
+            time.sleep(5)
+            page_source = driver.page_source
+        except Exception as e2:
+            logger.error("Retry failed loading %s: %s", link, e2)
+            return None
+
+    except Exception as e:
+        logger.error("Error/Timeout loading page %s: %s", link, e)
         return None
 
     # Parse the page source with BeautifulSoup
@@ -130,7 +188,13 @@ def Scrape_links(stock,location='US'):
             logger.debug('No datetime element found for link: %s', href)
             date_time_obj = None
 
-        links.append([heading, href, date_time_obj])
+        links.append(
+            {
+                "title": heading,
+                "url": href,
+                "date_dt": date_time_obj,
+            }
+        )
 
     
     # Print the total number of links

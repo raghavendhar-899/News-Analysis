@@ -86,8 +86,9 @@ def stockify(list, company,isnew):
    #  ------------------ Ollama -------------------
 
    for i in list:
-      logger.debug('Heading: %s', i[0])
-      query=base_query+i[0]
+      title = i.get("title", "") if isinstance(i, dict) else ""
+      logger.debug('Heading: %s', title)
+      query = base_query + title
       try:
          response = ollama.chat(model=OLLAMA_MODEL, messages=[
          {

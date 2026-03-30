@@ -74,7 +74,7 @@ def get_summary(text):
 
 
 def get_score(title='No title return 0',text = "no artical found return 0",company = 'no company return 0',isnew=False):
-    logger.info('Get_score called for company=%s title=%s', company, title)
+    logger.debug('Get_score called for company=%s title=%s', company, title)
     query = f"""
     For the following news article about {company}, assign a sentiment score toward its stock on a scale from -10 to +10. Use -10 for extremely negative sentiment, 0 for neutral, and +10 for extremely positive sentiment. Analyze the content carefully and respond with only a single numerical score (do not include any text or explanation).
 
