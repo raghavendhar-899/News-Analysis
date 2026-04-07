@@ -7,24 +7,21 @@ import json
 import random
 import re
 import time
-import warnings
 from pathlib import Path
 from typing import Any, Optional
 from urllib.parse import urlparse, urlunparse
 
-from duckduckgo_search import DDGS
-from duckduckgo_search.exceptions import RatelimitException, TimeoutException
+from ddgs import DDGS
+from ddgs.exceptions import RatelimitException, TimeoutException
 
 from app.utils.logger import get_logger
 
-warnings.filterwarnings("ignore", message=".*renamed to `ddgs`.*", category=RuntimeWarning)
-
 logger = get_logger(__name__)
 
-MAX_RESULTS_PER_QUERY = 100
+MAX_RESULTS_PER_QUERY = 50
 TIMEOUT = 20
 DELAY_SEC = 1.0
-NEWS_RETRY_ATTEMPTS = 6
+NEWS_RETRY_ATTEMPTS = 2
 NEWS_RETRY_BASE_SEC = 3.0
 OUTPUT_JSON = True
 # DuckDuckGo news ``df`` param: day + week passes, merged (URLs deduped).

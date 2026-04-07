@@ -16,5 +16,5 @@ selenium
 webdriver_manager
 ollama
 flask_jwt_extended
-duckduckgo-search>=6.0.0
+ddgs>=9.0.0
 # gunicorn

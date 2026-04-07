@@ -6,8 +6,6 @@ from datetime import datetime
 
 import requests
 
-import ollama
-
 import os
 from dotenv import load_dotenv
 
@@ -15,6 +13,7 @@ load_dotenv()
 
 OLLAMA_MODEL = os.getenv('OLLAMA_MODEL')
 from app.utils.logger import get_logger
+from app.utils.ollama_retry import chat_with_reset_retry
 
 logger = get_logger(__name__)
 logger.info('Ollama model = %s', OLLAMA_MODEL)
@@ -62,7 +61,7 @@ def get_summary(text):
     {text}
     """
 
-    response = ollama.chat(model=OLLAMA_MODEL, messages=[
+    response = chat_with_reset_retry(OLLAMA_MODEL, messages=[
     {
         'role': 'user',
         'content': query,
@@ -124,7 +123,7 @@ def get_score(title='No title return 0',text = "no artical found return 0",compa
 
 
     #  ------------------ Ollama api -------------------
-    response = ollama.chat(model=OLLAMA_MODEL, messages=[
+    response = chat_with_reset_retry(OLLAMA_MODEL, messages=[
     {
         'role': 'user',
         'content': query,

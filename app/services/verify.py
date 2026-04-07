@@ -2,8 +2,6 @@ from datetime import datetime
 
 import requests
 
-import ollama
-
 import os
 from dotenv import load_dotenv
 
@@ -11,6 +9,7 @@ load_dotenv()
 
 OLLAMA_MODEL = os.getenv('OLLAMA_MODEL')
 from app.utils.logger import get_logger
+from app.utils.ollama_retry import chat_with_reset_retry
 
 logger = get_logger(__name__)
 
@@ -90,7 +89,7 @@ def stockify(list, company,isnew):
       logger.debug('Heading: %s', title)
       query = base_query + title
       try:
-         response = ollama.chat(model=OLLAMA_MODEL, messages=[
+         response = chat_with_reset_retry(OLLAMA_MODEL, messages=[
          {
             'role': 'user',
             'content': query,
@@ -99,7 +98,6 @@ def stockify(list, company,isnew):
          result=False
          logger.debug('response: %s', response['message']['content'])
          result = True if response['message']['content'][0]=='T' else False
-         result = True
          logger.debug('result: %s', result)
          if result:
             stockified_articles.append(i)
