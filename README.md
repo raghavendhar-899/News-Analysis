@@ -14,7 +14,7 @@ python3 run.py
 Create `.env`:
 ```
 DATABASE_URL=mongodb+srv://...
-OLLAMA_MODEL=llama3.2
+OLLAMA_MODEL=gemma4:e2b
 ```
 
 ```bash
@@ -34,10 +34,14 @@ python run.py
 | Path | Description |
 |------|-------------|
 | `POST /start` | Start scraping for all companies |
+| `GET /tokens/usage` | Ollama token usage buckets (for [stockmarket-analysis-admin](../stockmarket-analysis-admin)) |
+| `GET /tokens/totals` | Ollama token totals by service |
 | `GET /test` | Health check |
 | `GET /health` | Liveness |
 
 to start the pipeline: curl -X POST http://127.0.0.1:8081/start   
+
+This service listens on **8081** (`run.py`) so it does not clash with **news-analysis-api** on **8080**. Main UI is on **3000**, admin (token) UI on **3003** — see **Port Summary** in [DOCUMENTATION.md](./DOCUMENTATION.md).
 
 ## Prerequisites
 

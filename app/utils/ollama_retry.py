@@ -6,6 +6,7 @@ import ollama
 from ollama import ResponseError
 
 from app.utils.logger import get_logger
+from app.utils.token_tracker import record_usage
 
 logger = get_logger(__name__)
 
@@ -30,15 +31,28 @@ def reset_ollama_model(model: str) -> None:
     ollama.pull(model, stream=False)
 
 
-def chat_with_reset_retry(model: str, messages: list, **kwargs):
+def chat_with_reset_retry(
+    model: str,
+    messages: list,
+    *,
+    service_name: str | None = None,
+    **kwargs,
+):
     """
     Run ollama.chat. On a single recoverable runner error, delete model, pull, retry once.
+    If service_name is set, prompt/completion token counts are recorded (SQLite).
     """
     try:
-        return ollama.chat(model=model, messages=messages, **kwargs)
+        response = ollama.chat(model=model, messages=messages, **kwargs)
     except ResponseError as e:
         if not _is_recoverable_runner_error(e):
             raise
         logger.warning("Ollama chat failed (%s); reset model and retry once", e)
         reset_ollama_model(model)
-        return ollama.chat(model=model, messages=messages, **kwargs)
+        response = ollama.chat(model=model, messages=messages, **kwargs)
+    if service_name:
+        try:
+            record_usage(service=service_name, response=response, model=model)
+        except Exception as ex:
+            logger.warning("token_tracker record failed: %s", ex)
+    return response

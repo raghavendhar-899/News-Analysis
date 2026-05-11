@@ -24,10 +24,40 @@ def stockify(list, company,isnew):
    '''
 
    stockified_articles=[]
-   base_query=f"""For the company {company}, determine if the following news headline is likely to have a impact (even slight impact) on its stock price. Consider any market sentiment, tone, or content that could influence investor behavior. Respond strictly with either "True" (if the headline is likely to affect the stock price) or "False" (if it is not). Do not include any extra explanation or commentary.
-      Headline:
+   # base_query=f"""For the company {company}, determine if the following news headline is likely to have a impact (even slight impact) on its stock price. Consider any market sentiment, tone, or content that could influence investor behavior. Respond strictly with either "True" (if the headline is likely to affect the stock price) or "False" (if it is not). Do not include any extra explanation or commentary.
+   #    Headline:
 
-      """
+   #    """
+   base_query=f"""
+   ### ROLE
+   You are a Targeted Market Intelligence Agent. Your sole and exclusive focus is the equity performance and sentiment surrounding {company}. You must ignore all other entities mentioned unless they have a demonstrable ripple effect on {company}.
+
+   ### THE "SINGLE-TARGET" RULE
+   Your evaluation is binary and must be viewed through the lens of {company} only. 
+   1. Is this news about {company}? 
+   2. If not, does this news directly affect the business environment of {company}?
+   3. If the answer to both is No, the result is "False," even if the headline is "major" for another firm.
+
+   ### DEFINITION OF IMPACT FOR {company}
+   You must return "True" if there is even a minor or slight impact on {company}, specifically:
+   - **Direct Mentions:** Any headline where {company} is the primary or secondary subject.
+   - **Sector Contagion:** News affecting the specific industry niche of {company}.
+   - **Supply/Demand Chain:** News regarding major partners, suppliers, or customers of {company}.
+   - **Competitive Pressure:** Significant moves by rivals that force a market reaction from {company}.
+
+   ### STRICT PROCESSING INSTRUCTIONS
+   1. Analyze the 'HEADLINE TO ANALYZE' specifically for its relationship to {company}.
+   2. Determine if the news creates any delta (change) in the perceived value of {company}.
+   3. Even if the impact on {company} is slight, you must prioritize "True".
+   4. If the headline is entirely unrelated to {company} and its immediate ecosystem, respond "False".
+
+   ### FINAL OUTPUT
+   Just give "True" or "False". Dont give any explanation or commentary.
+
+   ### DATA INPUTS
+   - **TARGET ENTITY:** {company}
+   - **HEADLINE TO ANALYZE:**
+   """
    
    # ------------------ Google gemini api -------------------
 
@@ -89,12 +119,16 @@ def stockify(list, company,isnew):
       logger.debug('Heading: %s', title)
       query = base_query + title
       try:
-         response = chat_with_reset_retry(OLLAMA_MODEL, messages=[
-         {
-            'role': 'user',
-            'content': query,
-         },
-         ])
+         response = chat_with_reset_retry(
+            OLLAMA_MODEL,
+            messages=[
+                {
+                    'role': 'user',
+                    'content': query,
+                },
+            ],
+            service_name='verify',
+         )
          result=False
          logger.debug('response: %s', response['message']['content'])
          result = True if response['message']['content'][0]=='T' else False

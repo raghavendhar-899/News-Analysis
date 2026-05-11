@@ -55,6 +55,7 @@ All three share the same **MongoDB** database for persistence.
 │   │      -ui        │      │      api        │       │   (Pipeline)    │    │
 │   │  (React :3000)  │      │  (Flask :8080)  │       │  (Flask :8081)  │    │
 │   └─────────────────┘      └──────┬──────────┘       └────────┬────────┘    │
+│   Stockmarket Analysis Admin (React :3003) ──────────► same API :8080 (/tokens)     │
 │            │                         │                        │             │
 │            │                         │                        │             │
 │            │                         ▼                        ▼             │
@@ -79,6 +80,7 @@ All three share the same **MongoDB** database for persistence.
 1. **News-Analysis** (pipeline): Scrapes Google News → filters with Ollama → scrapes full articles → summarizes & scores with Ollama → writes to MongoDB
 2. **news-analysis-api**: Reads news from MongoDB, fetches stock data from yfinance, serves UI
 3. **news-analysis-ui**: Calls API for company data, news, and stock charts
+4. **stockmarket-analysis-admin** (port 3003): Calls **News-Analysis** on **8081** at `/tokens/*`; SQLite is written by the same app during Ollama calls
 
 ---
 
@@ -105,7 +107,7 @@ News-Analysis/
 │   │   └── verify.py        # Stock-relevance filtering (Ollama)
 │   └── utils/
 │       └── database.py      # MongoDB client
-├── run.py                    # Flask entry point (host 0.0.0.0, port 8080)
+├── run.py                    # Flask entry point (host 0.0.0.0, port 8081 — avoids clash with API on 8080)
 ├── requirements.txt
 ├── Dockerfile
 └── .env                      # DATABASE_URL, OLLAMA_MODEL
@@ -162,7 +164,7 @@ python -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 # Create .env with DATABASE_URL, OLLAMA_MODEL
-python run.py              # Listens on http://0.0.0.0:8080
+python run.py              # Listens on http://0.0.0.0:8081
 ```
 
 **CLI pipeline (no server):**
@@ -176,7 +178,7 @@ python -c "from main import start; start()"
 docker build -t news-analysis .
 docker run -p 8080:8080 news-analysis
 ```
-*Note: Dockerfile copies only `app/` and uses `flask run`; `run.py` is not in the image. Set `FLASK_APP` if needed.*
+*Note: Dockerfile copies only `app/` and uses `flask run --port 8080` (not `run.py`). Local `python run.py` uses **8081**.*
 
 ### Prerequisites
 
@@ -423,9 +425,10 @@ npm start    # http://localhost:3000
 
 | Service | Default Port | Note |
 |---------|--------------|------|
-| news-analysis-api | 8080 | Used by UI |
-| news-analysis-ui | 3000 | React dev server |
-| News-Analysis | 8080 | Change to 8081 if running with API |
+| news-analysis-api | 8080 | Main API for news-analysis-ui (news, stocks, auth) |
+| news-analysis-ui | 3000 | Main React app (CRA default) |
+| stockmarket-analysis-admin | 3003 | Admin UI for token charts (Vite; calls pipeline :8081) |
+| News-Analysis (`run.py`) | 8081 | Pipeline + `/tokens/*` + `/start`; avoids clashing with API on 8080 |
 
 ---
 
@@ -437,6 +440,7 @@ npm start    # http://localhost:3000
 |----------|----------|-------------|
 | `DATABASE_URL` | Yes | MongoDB connection string |
 | `OLLAMA_MODEL` | Yes | Ollama model name (e.g. `llama3.2`) |
+| `TOKEN_USAGE_DB` | No | Absolute path to `token_usage.db` if not using default `data/token_usage.db` under this repo |
 
 ### news-analysis-api
 
@@ -450,6 +454,14 @@ npm start    # http://localhost:3000
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `REACT_APP_API_URL` | No | API base URL (default: `http://localhost:8080`) |
+
+### stockmarket-analysis-admin
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VITE_TOKEN_API_BASE` | No | Base URL for `/tokens/*` on the **News-Analysis** Flask app (default: `http://localhost:8081`) |
+
+Dev server port **3003** is set in `vite.config.js` (not `PORT` in `.env`).
 
 ---
 
@@ -469,7 +481,7 @@ npm start    # http://localhost:3000
 
 ### General
 
-- **Port conflict:** News-Analysis and news-analysis-api both use 8080. Run one on a different port when running locally.
+- **Port conflict:** Keep **news-analysis-api** on **8080** and **News-Analysis** on **8081** (`run.py`). Run **news-analysis-ui** on **3000** and **stockmarket-analysis-admin** on **3003** so both React dev servers can run together.
 - **CORS:** API allows `*` origins; restrict in production.
 - **Auth:** JWT tokens are sent via `x-access-token` header.
 
@@ -479,7 +491,8 @@ npm start    # http://localhost:3000
 
 | What | Where |
 |------|-------|
-| Trigger scraping | `GET http://localhost:8081/start` (News-Analysis) |
+| Trigger scraping | `POST http://localhost:8081/start` (News-Analysis) |
+| Token usage / totals | `GET http://localhost:8081/tokens/usage`, `/tokens/totals` (News-Analysis) |
 | Company news | `GET http://localhost:8080/<companyname>` |
 | Stock data | `GET http://localhost:8080/stockprice/<ticker>/<timeframe>` |
 | Add company | `POST http://localhost:8080/newcompany` |

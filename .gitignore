@@ -1,4 +1,5 @@
 path/
+data/token_usage.db
 __pycache__/
 *.env
 .idea

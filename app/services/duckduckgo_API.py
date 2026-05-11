@@ -19,7 +19,7 @@ from app.utils.logger import get_logger
 logger = get_logger(__name__)
 
 MAX_RESULTS_PER_QUERY = 50
-TIMEOUT = 20
+TIMEOUT = 2
 DELAY_SEC = 1.0
 NEWS_RETRY_ATTEMPTS = 2
 NEWS_RETRY_BASE_SEC = 3.0
@@ -35,6 +35,7 @@ def _queries(company: str, ticker: str, extra: list[str]) -> list[str]:
     if not name:
         raise ValueError("Company name is required.")
     out = [
+        name,
         f"{name} stock news",
         f"{name} company news",
         f"{name} earnings",
