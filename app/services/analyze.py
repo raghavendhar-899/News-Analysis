@@ -112,28 +112,65 @@ def get_score(title='No title return 0',text = "no artical found return 0",compa
 
 #    """
 
+    
+    # ### ROLE
+    # You are a Senior Quantitative Equity Analyst specializing in Natural Language Processing (NLP). Your objective is to extract high-signal financial sentiment from news data to predict short-term stock price momentum for a specific ticker.
+
+    # ### EVALUATION RUBRIC
+    # Assign a sentiment score from -10 to +10 based on the following scale:
+    # - **-10 to -8 (Severe):** Existential threats (e.g., bankruptcy, major fraud, massive earnings miss, severe regulatory litigation).
+    # - **-7 to -3 (Negative):** Negative catalysts (e.g., analyst downgrades, minor earnings miss, product delays, loss of market share).
+    # - **-2 to +2 (Neutral):** Noise or "Priced-in" news (e.g., routine board updates, industry-wide news with no specific company impact, news already reflected in market price).
+    # - **+3 to +7 (Positive):** Bullish catalysts (e.g., analyst upgrades, product launches, revenue beat, new partnerships).
+    # - **+8 to +10 (Exceptional):** Major breakthroughs (e.g., surprise acquisition, massive earnings beat, game-changing patent approval).
+
+    # ### RULES
+    # 1. **Ticker Focus:** Evaluate sentiment ONLY in relation to {company}. Ignore sentiment toward competitors or the broader market unless it directly impacts {company}.
+    # 2. **Novelty Weighting:** Prioritize "New Information." Deduct weight from news that is merely summarizing historical performance.
+    # 3. **Internal Logic:** Even if not outputting text, internally evaluate: (a) Financial impact, (b) Strategic impact, and (c) Market surprise.
+    # 4. **Strict Output:** You must provide the final score. No explanation or commentary.
+    # 5. **Neutral Threshold:** If the news does not directly impact {company}'s financial performance or strategy, assign a score of 0.
+
+    # ### INPUT
+    # Article Title: {title}
+
+    # Article Body: {text}
     query = f"""
     ### ROLE
-    You are a Senior Quantitative Equity Analyst specializing in Natural Language Processing (NLP). Your objective is to extract high-signal financial sentiment from news data to predict short-term stock price momentum for a specific ticker.
 
-    ### EVALUATION RUBRIC
-    Assign a sentiment score from -10 to +10 based on the following scale:
-    - **-10 to -8 (Severe):** Existential threats (e.g., bankruptcy, major fraud, massive earnings miss, severe regulatory litigation).
-    - **-7 to -3 (Negative):** Negative catalysts (e.g., analyst downgrades, minor earnings miss, product delays, loss of market share).
-    - **-2 to +2 (Neutral):** Noise or "Priced-in" news (e.g., routine board updates, industry-wide news with no specific company impact, news already reflected in market price).
-    - **+3 to +7 (Positive):** Bullish catalysts (e.g., analyst upgrades, product launches, revenue beat, new partnerships).
-    - **+8 to +10 (Exceptional):** Major breakthroughs (e.g., surprise acquisition, massive earnings beat, game-changing patent approval).
+    Act as a Senior Quantitative Equity Analyst and Portfolio Risk Manager specializing in algorithmic NLP sentiment extraction and event-driven trading. Your objective is to identify asymmetric, short-term stock price momentum anomalies and evaluate complex cross-asset contagion for a specific target ticker.
 
-    ### RULES
-    1. **Ticker Focus:** Evaluate sentiment ONLY in relation to {company}. Ignore sentiment toward competitors or the broader market unless it directly impacts {company}.
-    2. **Novelty Weighting:** Prioritize "New Information." Deduct weight from news that is merely summarizing historical performance.
-    3. **Internal Logic:** Even if not outputting text, internally evaluate: (a) Financial impact, (b) Strategic impact, and (c) Market surprise.
-    4. **Strict Output:** You must provide the final score. No explanation or commentary.
-    5. **Neutral Threshold:** If the news does not directly impact {company}'s financial performance or strategy, assign a score of 0.
+    ### TARGET TICKER
+
+    Company: {company}
+
+    ### THE CONTAGION & TECOP DIRECTIVE (CRITICAL)
+
+    You must evaluate the provided news for both direct impacts and second-order, indirect effects. Do NOT assign a score of 0 simply because {company} is not explicitly named. You must evaluate the text using the following frameworks:
+
+    Multi-Level Strata: Analyze impacts at the Micro (firm-specific), Meso (competitors/industry), and Macro (systemic) levels.
+
+    Headwinds vs. Tailwinds: Determine if the news creates an operational tailwind (e.g., lower input costs, competitor failure) or a severe headwind (e.g., technological obsolescence, macro-economic slowdown) for {company}'s specific business model.
+
+    TECOP Analysis: Categorize risks/opportunities across Technical, Environmental, Commercial, Operational, and Political dimensions.
+
+    Example: If the news announces a major breakthrough in autonomous AI coding, and the company is a legacy IT services firm reliant on human billable hours, you must recognize this as a severe structural threat and assign a highly negative score, even if company is omitted from the text.
+
+    ### EVALUATION RUBRIC (-10 to +10)
+
+    -10 to -8 (Severe): Existential threats, capital destruction, structural obsolescence, major fraud, or catastrophic macroeconomic headwinds.
+
+    -7 to -2 (Negative): Negative catalysts, margin compression, transitional sector risks, loss of market share to disruptive tech, or rising input costs.
+
+    -1 to +1 (Neutral): Pure noise, routine updates, or broad news that genuinely has no operational or financial crossover with {company}'s business model.
+
+    +2 to +7 (Positive): Bullish catalysts, revenue beats, favorable regulatory shifts, or macroeconomic tailwinds expanding the Total Addressable Market (TAM).
+
+    +8 to +10 (Exceptional): Major breakthroughs, monopolistic advantages, massive accretive acquisitions, or competitor collapse.
 
     ### INPUT
-    Article Title: {title}
 
+    Article Title: {title}
     Article Body: {text}
 
     ### OUTPUT

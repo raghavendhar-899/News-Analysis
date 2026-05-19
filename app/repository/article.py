@@ -1,12 +1,16 @@
-from pymongo import MongoClient, ASCENDING
-from datetime import datetime, timedelta
+from pymongo import ASCENDING
+
 from app.utils.database import get_database
+
 
 class Article:
     def __init__(self, collection_name):
         self.db = get_database()
         self.news_collection = self.db[collection_name]
-        self.news_collection.create_index([('date', ASCENDING)], expireAfterSeconds=345600)
+        # 345600s = 4 days
+        self.news_collection.create_index(
+            [('date', ASCENDING)], expireAfterSeconds=345600
+        )
 
     def insert_article(self, title, link, date, summary, score):
         article = {
@@ -25,10 +29,14 @@ class Article:
         return self.news_collection.delete_one({"title": title})
 
     def get_all_article(self):
-        sort=list({'date': -1}.items())
-        # return list(self.news_collection.find({}, sort=sort))
-        return list(self.news_collection.find({}, {"_id": 0},sort=sort))
-    
+        sort = list({'date': -1}.items())
+        return list(self.news_collection.find({}, {"_id": 0}, sort=sort))
+
     def get_all_article_scores(self):
         articles = self.news_collection.find({}, {"_id": 0, "score": 1})
         return [article["score"] for article in articles]
+
+    def get_scored_articles(self):
+        return list(
+            self.news_collection.find({}, {"_id": 0, "score": 1, "date": 1})
+        )

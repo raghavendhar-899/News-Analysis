@@ -3,6 +3,7 @@ from app.services import scrape
 from app.services import verify
 from app.repository.company import Company
 from app.repository.article import Article
+from app.services.company_news_score import calculate_score
 from app.services.duckduckgo_API import get_company_news
 import time
 from app.utils.logger import get_logger
@@ -66,19 +67,6 @@ def start():
 #     score = calculate_score(name)
 #     print('Score = ---------',score)
 #     companyobj.update_company_score(name,score)
-        
-def calculate_score(company):
-    articleobj = Article(company)
-    scores = articleobj.get_all_article_scores()
-    valid_count = 0
-    totalscore = 0
-    for i in scores:
-        if i!='--':
-            valid_count+=1
-            totalscore+=i
-    if valid_count>0:
-        return totalscore/valid_count
-    return 0
 
 
 def get_article_data(company,location,isnew=False):
