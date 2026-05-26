@@ -5,3 +5,6 @@ __pycache__/
 .idea
 venv
 .DS_Store
+.DS_Store
+app/News-Analysis.code-workspace
+.DS_Store

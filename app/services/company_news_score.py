@@ -66,7 +66,7 @@ def _weight_for_scored_article(article_date, age_days, ref_day):
     On Monday, Sat/Sun/Mon articles all use today's weight (4).
     On Tue–Fri, weekend articles use normal age-based weights.
     """
-    if isinstance(article_date, datetime) and ref_day.weekday() == 0:
+    if isinstance(article_date, datetime) and (ref_day.weekday() == 0 or ref_day.weekday() == 6):
         art_day = article_date.date()
         if art_day.weekday() >= 5 or art_day == ref_day:
             return _RECENCY_WEIGHT_TODAY
